@@ -1,0 +1,26 @@
+<!doctype html><html><body style="margin:0">
+<iframe id="f" src="/" width="1440" height="900" style="border:0"></iframe>
+<pre id="out">running</pre>
+<script>
+const f=document.getElementById('f'), log=[], sleep=ms=>new Promise(r=>setTimeout(r,ms));
+f.onload=async()=>{
+  const w=f.contentWindow, d=f.contentDocument, $=s=>d.querySelector(s);
+  const tx=el=>new DOMMatrix(w.getComputedStyle(el).transform).m41.toFixed(1);
+  await sleep(2500);
+  log.push('counters: '+[...d.querySelectorAll('.counter[data-days]')].map(c=>c.textContent.replace(/\s|DAY/g,'')).join(' '));
+  const t=$('#ticker'); log.push('ticker classes: '+t.className);
+  t.scrollIntoView({block:'center'}); await sleep(600); log.push('ticker in view: '+t.className);
+  const tr=$('.ticker__row--a .ticker__track'); const x1=tx(tr); await sleep(1500); const x2=tx(tr);
+  log.push('ticker row A x: '+x1+' -> '+x2+(x1!==x2?'  (moving)':'  (still)'));
+  const b=$('#close-bill'); log.push('bill before scroll: '+b.className);
+  b.scrollIntoView({block:'center'}); await sleep(400);
+  log.push('bill 0.4s after scroll-in: '+b.className+' | clip='+w.getComputedStyle(b).clipPath);
+  log.push('ticker after scrolling away: '+t.className);
+  t.scrollIntoView({block:'center'}); await sleep(300); t.dispatchEvent(new MouseEvent('mouseover',{bubbles:true})); const h1=tx(tr); await sleep(800); log.push('ticker paused flag honoured: '+(()=>{t.classList.add('is-paused'); return 'checking'})()); const p1=tx(tr); await sleep(800); const p2=tx(tr); log.push('ticker with is-paused: '+p1+' -> '+p2+(p1===p2?'  (stopped)':'  (STILL MOVING)')); t.classList.remove('is-paused'); b.scrollIntoView({block:'center'}); await sleep(100);
+  await sleep(2200);
+  log.push('bill 2.6s after: '+b.className+' | p opacity='+w.getComputedStyle(b.querySelector('p')).opacity+' | line y='+new DOMMatrix(w.getComputedStyle(b.querySelector('.line>span')).transform).m42);
+  w.scrollTo(0,0); const i=$('#ad-url'); i.value='https://www.facebook.com/ads/library/?id=1'; $('#paste-form').requestSubmit(); await sleep(1200);
+  log.push('paste-up: new poster='+!!$('.ad--new')+' counter='+$('.ad--new .counter').textContent.replace(/\s|DAY/g,''));
+  document.getElementById('out').textContent=log.join('\n');
+};
+</script></body></html>

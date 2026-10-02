@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 400" width="1280" height="400" role="img" aria-labelledby="t d">
+  <title id="t">Quintessence</title>
+  <desc id="d">Five colored strands, one per design toolkit, converge into a single five-pointed mark beside the word Quintessence.</desc>
+  <defs>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f4efe6" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#f4efe6" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#f4efe6" stroke-opacity=".05"/>
+    </pattern>
+  </defs>
+  <rect width="1280" height="400" fill="#121614"/>
+  <rect width="1280" height="400" fill="url(#grid)"/>
+
+  <!-- five strands: ui-ux-pro-max, impeccable, emil, taste, forever -->
+  <g fill="none" stroke-width="6" stroke-linecap="round">
+    <path d="M-10 40 C 160 40, 220 200, 330 200" stroke="#ff5b1a"/>
+    <path d="M-10 120 C 150 120, 230 200, 330 200" stroke="#ffd400"/>
+    <path d="M-10 200 C 120 200, 240 200, 330 200" stroke="#7bd88f"/>
+    <path d="M-10 280 C 150 280, 230 200, 330 200" stroke="#5b8cff"/>
+    <path d="M-10 360 C 160 360, 220 200, 330 200" stroke="#ff3f8e"/>
+  </g>
+
+  <!-- the fifth essence: a pentagram knot where the strands meet -->
+  <circle cx="370" cy="200" r="120" fill="url(#glow)"/>
+  <g transform="translate(370 200)">
+    <polygon points="0,-62 14.6,-20.1 59,-19.2 23.6,7.7 36.4,50.2 0,25 -36.4,50.2 -23.6,7.7 -59,-19.2 -14.6,-20.1"
+             fill="#f4efe6"/>
+    <circle r="8" fill="#121614"/>
+  </g>
+
+  <text x="500" y="196" fill="#f4efe6" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="92" font-weight="800" letter-spacing="-3">Quintessence</text>
+  <text x="504" y="246" fill="#b9c2bc" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="26" font-weight="400">Five design toolkits, distilled into one Claude Code skill.</text>
+  <g font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="15" letter-spacing="1">
+    <text x="504" y="300" fill="#ff5b1a">UI-UX-PRO-MAX</text>
+    <text x="646" y="300" fill="#ffd400">IMPECCABLE</text>
+    <text x="760" y="300" fill="#7bd88f">EMIL</text>
+    <text x="816" y="300" fill="#5b8cff">TASTE</text>
+    <text x="882" y="300" fill="#ff3f8e">FOREVER</text>
+  </g>
+</svg>

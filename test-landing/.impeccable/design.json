@@ -1,0 +1,396 @@
+{
+ "schemaVersion": 2,
+ "generatedAt": "2026-10-02T07:59:30+00:00",
+ "title": "Design System: Swipefile",
+ "extensions": {
+  "colorMeta": {
+   "site-green": {
+    "role": "primary",
+    "displayName": "Site Green",
+    "canonical": "oklch(33.1% 0.049 156.2)",
+    "tonalRamp": [
+     "#020f06",
+     "#172a1e",
+     "#314839",
+     "#4d6957",
+     "#6b8b76",
+     "#90ae9a",
+     "#b6d1bf",
+     "#def6e5"
+    ]
+   },
+   "site-green-deep": {
+    "role": "primary",
+    "displayName": "Site Green Deep",
+    "canonical": "oklch(28.4% 0.041 157.9)",
+    "tonalRamp": [
+     "#030e07",
+     "#192920",
+     "#33473b",
+     "#506859",
+     "#6f8a79",
+     "#93ac9c",
+     "#b9d0c1",
+     "#e0f5e7"
+    ]
+   },
+   "chalk": {
+    "role": "neutral",
+    "displayName": "Chalk",
+    "canonical": "oklch(95.8% 0.011 136.6)",
+    "tonalRamp": [
+     "#0a0c09",
+     "#232622",
+     "#40433f",
+     "#5f635d",
+     "#7f847e",
+     "#a2a6a1",
+     "#c7cac5",
+     "#ecf0eb"
+    ]
+   },
+   "lichen": {
+    "role": "neutral",
+    "displayName": "Lichen",
+    "canonical": "oklch(84.5% 0.034 153.6)",
+    "tonalRamp": [
+     "#050e07",
+     "#1c2920",
+     "#37463b",
+     "#546759",
+     "#738979",
+     "#97ab9c",
+     "#bdcfc1",
+     "#e3f3e7"
+    ]
+   },
+   "newsprint": {
+    "role": "neutral",
+    "displayName": "Newsprint",
+    "canonical": "oklch(94.6% 0.008 121.6)",
+    "tonalRamp": [
+     "#0b0b09",
+     "#242522",
+     "#41433f",
+     "#60625d",
+     "#81837e",
+     "#a4a6a1",
+     "#c8cac5",
+     "#eeefeb"
+    ]
+   },
+   "newsprint-shade": {
+    "role": "neutral",
+    "displayName": "Newsprint Shade",
+    "canonical": "oklch(90.8% 0.011 123.5)",
+    "tonalRamp": [
+     "#0b0c09",
+     "#242622",
+     "#41433e",
+     "#60625c",
+     "#81837c",
+     "#a4a69f",
+     "#c8cac4",
+     "#edefea"
+    ]
+   },
+   "fresh-paste": {
+    "role": "neutral",
+    "displayName": "Fresh Paste",
+    "canonical": "oklch(97.7% 0.005 117.9)",
+    "tonalRamp": [
+     "#0b0b0a",
+     "#252523",
+     "#424240",
+     "#61625e",
+     "#82837f",
+     "#a5a5a2",
+     "#c9c9c6",
+     "#eeefec"
+    ]
+   },
+   "press-black": {
+    "role": "neutral",
+    "displayName": "Press Black",
+    "canonical": "oklch(19.1% 0.000 89.9)",
+    "tonalRamp": [
+     "#0b0b0b",
+     "#252525",
+     "#424242",
+     "#616161",
+     "#828282",
+     "#a5a5a5",
+     "#c9c9c9",
+     "#eeeeee"
+    ]
+   },
+   "press-grey": {
+    "role": "neutral",
+    "displayName": "Press Grey",
+    "canonical": "oklch(36.4% 0.009 124.7)",
+    "tonalRamp": [
+     "#0b0c09",
+     "#242622",
+     "#41433f",
+     "#60625d",
+     "#81837e",
+     "#a4a6a1",
+     "#c8cac5",
+     "#edefeb"
+    ]
+   },
+   "fluoro-orange": {
+    "role": "secondary",
+    "displayName": "Fluoro Orange",
+    "canonical": "oklch(68.3% 0.211 38.5)",
+    "tonalRamp": [
+     "#2e0000",
+     "#580000",
+     "#840000",
+     "#b32000",
+     "#e34000",
+     "#ff7242",
+     "#ff9f75",
+     "#ffcca6"
+    ]
+   },
+   "riso-blue": {
+    "role": "secondary",
+    "displayName": "Riso Blue",
+    "canonical": "oklch(48.2% 0.217 267.3)",
+    "tonalRamp": [
+     "#040040",
+     "#09116d",
+     "#1b329c",
+     "#3152cf",
+     "#4a73ff",
+     "#6f9bff",
+     "#98c3ff",
+     "#c2ebff"
+    ]
+   },
+   "fluoro-pink": {
+    "role": "secondary",
+    "displayName": "Fluoro Pink",
+    "canonical": "oklch(67.5% 0.232 1.1)",
+    "tonalRamp": [
+     "#2e0008",
+     "#590020",
+     "#86003c",
+     "#b5005a",
+     "#e5207a",
+     "#ff609d",
+     "#ff91c2",
+     "#ffbfe8"
+    ]
+   },
+   "gaffer-yellow": {
+    "role": "tertiary",
+    "displayName": "Gaffer Yellow",
+    "canonical": "oklch(88.1% 0.181 94.0)",
+    "tonalRamp": [
+     "#1a0500",
+     "#391f00",
+     "#5b3c00",
+     "#805b00",
+     "#a67d00",
+     "#c6a100",
+     "#e8c74d",
+     "#ffed8a"
+    ]
+   },
+   "gaffer-ink": {
+    "role": "tertiary",
+    "displayName": "Gaffer Ink",
+    "canonical": "oklch(19.9% 0.041 100.7)",
+    "tonalRamp": [
+     "#0d0b02",
+     "#282615",
+     "#46432e",
+     "#66624a",
+     "#878367",
+     "#aaa68c",
+     "#cdcab2",
+     "#f2efda"
+    ]
+   }
+  },
+  "typographyMeta": {
+   "display": {
+    "displayName": "Display",
+    "purpose": "Hero and closing bills only."
+   },
+   "headline": {
+    "displayName": "Headline",
+    "purpose": "Section headings set on the hoarding."
+   },
+   "title": {
+    "displayName": "Title",
+    "purpose": "Poster hooks, state names, handbill steps."
+   },
+   "body": {
+    "displayName": "Body",
+    "purpose": "All reading copy, max 60ch."
+   },
+   "label": {
+    "displayName": "Label",
+    "purpose": "Counts, stamps, platforms, states. Never a sentence."
+   }
+  },
+  "shadows": [
+   {
+    "name": "paper-on-wall",
+    "value": "0 1px 1px rgba(0,0,0,.25), 0 10px 24px -8px rgba(0,0,0,.45)",
+    "purpose": "Every pasted sheet: contact line plus soft drop."
+   },
+   {
+    "name": "fresh-sheet",
+    "value": "-4px 5px 12px rgba(0,0,0,.32)",
+    "purpose": "A sheet pasted over another poster."
+   }
+  ],
+  "motion": [
+   {
+    "name": "ease-out",
+    "value": "cubic-bezier(0.23, 1, 0.32, 1)",
+    "purpose": "Entrances, press feedback, tape wipe, line rises."
+   },
+   {
+    "name": "ease-in-out",
+    "value": "cubic-bezier(0.77, 0, 0.175, 1)",
+    "purpose": "On-screen wipes: the closing bill printing, its rule drawing."
+   },
+   {
+    "name": "paste-up",
+    "value": "420ms ease-out",
+    "purpose": "Signature moment: a pasted ad lands on the wall; neighbours shift 300ms."
+   },
+   {
+    "name": "press",
+    "value": "120ms ease-out, scale 0.97",
+    "purpose": "Button press."
+   },
+   {
+    "name": "tape-wipe",
+    "value": "220ms ease-out clip-path",
+    "purpose": "Tape marking the chosen variant."
+   },
+   {
+    "name": "ticker",
+    "value": "46s / 58s linear",
+    "purpose": "Wall report rows; paused off-screen, hidden, hover, focus; static under reduced motion."
+   },
+   {
+    "name": "bill-print",
+    "value": "700ms ease-in-out + staged 350-900ms reveals",
+    "purpose": "Closing bill prints once on scroll-in."
+   }
+  ],
+  "breakpoints": [
+   {
+    "name": "stack",
+    "value": "1080px"
+   },
+   {
+    "name": "phone",
+    "value": "760px"
+   }
+  ]
+ },
+ "components": [
+  {
+   "name": "Primary Button",
+   "kind": "button",
+   "refersTo": "button-primary",
+   "description": "Default action on paper.",
+   "html": "<button class=\"ds-btn\">Paste it up <svg viewBox=\"0 0 20 20\" width=\"18\" height=\"18\" fill=\"none\" aria-hidden=\"true\"><path d=\"M4 10h11m-4-5 5 5-5 5\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"square\"/></svg></button>",
+   "css": ".ds-btn{display:inline-flex;align-items:center;gap:10px;font:700 1rem/1 'Libre Franklin',sans-serif;padding:14px 20px;border:0;border-radius:2px;background:#141414;color:#eceee8;cursor:pointer;transition:transform .12s cubic-bezier(.23,1,.32,1),background-color .2s ease}.ds-btn:hover{background:#2b2b2b}.ds-btn:active{transform:scale(.97)}.ds-btn:focus-visible{outline:3px solid #ffd400;outline-offset:3px}"
+  },
+  {
+   "name": "Tape Button",
+   "kind": "button",
+   "refersTo": "button-tape",
+   "description": "The one header action.",
+   "html": "<a class=\"ds-btn-tape\" href=\"#\">Get the extension</a>",
+   "css": ".ds-btn-tape{display:inline-flex;font:700 1rem/1 'Libre Franklin',sans-serif;padding:14px 20px;border-radius:2px;background:#ffd400;color:#1a1600;text-decoration:none}.ds-btn-tape:hover{background:#ffe04d}.ds-btn-tape:focus-visible{outline:3px solid #ffd400;outline-offset:3px}"
+  },
+  {
+   "name": "Link Field",
+   "kind": "input",
+   "refersTo": "input-link",
+   "description": "Labelled URL field with error state.",
+   "html": "<label class=\"ds-field\"><span>Paste an Ad Library link</span><input placeholder=\"facebook.com/ads/library/?id=…\"></label>",
+   "css": ".ds-field{display:grid;gap:8px;font:700 .9375rem 'Libre Franklin',sans-serif;color:#141414}.ds-field input{font:500 1rem 'Libre Franklin',sans-serif;padding:12px 14px;border:2px solid #141414;border-radius:2px;background:#fff;color:#141414}.ds-field input::placeholder{color:#62655e}.ds-field input:focus-visible{outline:3px solid #ffd400;outline-offset:2px}"
+  },
+  {
+   "name": "Navigation",
+   "kind": "nav",
+   "refersTo": "nav",
+   "description": "Stencilled sign, Franklin links, tape action.",
+   "html": "<nav class=\"ds-nav\"><a class=\"ds-sign\" href=\"#\">SWIPEFILE</a><a href=\"#\">Run-length</a><a href=\"#\">Briefs</a></nav>",
+   "css": ".ds-nav{display:flex;align-items:center;gap:28px;background:#1f3d2b;padding:16px;color:#eef3ec;font:600 .9375rem 'Libre Franklin',sans-serif}.ds-nav a{color:inherit;text-decoration:none}.ds-nav a:hover{text-decoration:underline;text-underline-offset:.22em}.ds-sign{font:900 1.75rem/1 'Big Shoulders Display',sans-serif;letter-spacing:.06em;background:#eef3ec;color:#1f3d2b!important;padding:6px 12px 4px}"
+  },
+  {
+   "name": "State Tag",
+   "kind": "chip",
+   "refersTo": "state-tag",
+   "description": "Run-length state on a poster.",
+   "html": "<span class=\"ds-state\">Long-runner</span>",
+   "css": ".ds-state{font:600 .6875rem 'Martian Mono',monospace;letter-spacing:.06em;text-transform:uppercase;padding:3px 6px;border:1.5px solid currentColor;border-radius:2px;color:#141414}"
+  },
+  {
+   "name": "Poster",
+   "kind": "card",
+   "refersTo": "poster",
+   "description": "Signature: a pasted ad with its day counter.",
+   "html": "<div class=\"ds-poster\"><div class=\"ds-top\"><b>Brightside Oat Bars</b><span>META</span></div><p class=\"ds-hook\">Breakfast that fits in a jeans pocket</p><div class=\"ds-foot\"><span class=\"ds-count\">DAY <i>2</i><i>1</i><i>4</i></span><span class=\"ds-state\">Long-runner</span></div></div>",
+   "css": ".ds-poster{background:#eceee8;color:#141414;padding:16px;display:grid;gap:10px;transform:rotate(-1.2deg);box-shadow:0 1px 1px rgba(0,0,0,.25),0 10px 24px -8px rgba(0,0,0,.45);max-width:320px}.ds-top{display:flex;justify-content:space-between;font:700 .8125rem 'Libre Franklin',sans-serif}.ds-top span{font:400 .6875rem 'Martian Mono',monospace}.ds-hook{margin:0 -16px;padding:12px 16px;background:#ff5b1a;font:800 1.6rem/.95 'Big Shoulders Display',sans-serif;text-transform:uppercase}.ds-foot{display:flex;justify-content:space-between;align-items:end}.ds-count{font:600 .6875rem 'Martian Mono',monospace;display:flex;gap:2px;align-items:center}.ds-count i{font-style:normal;background:#141414;color:#eceee8;padding:4px 5px;border-radius:2px;font-size:.9375rem}.ds-state{font:600 .6875rem 'Martian Mono',monospace;text-transform:uppercase;padding:3px 6px;border:1.5px solid currentColor;border-radius:2px}"
+  }
+ ],
+ "narrative": {
+  "northStar": "The Fly-Posted Hoarding",
+  "overview": "The page is a painted construction hoarding in a city street. Ads are two-ink posters wheatpasted onto it; the ones still being paid for stay up and weather, one-day tests get pasted over. Every surface is either the hoarding (site green plywood) or paper stuck to it, and the paper carries the product's one idea: run-length is the signal.\n\nThe register is loud, physical and direct, the way street posting is, never glossy SaaS. Posters sit a few degrees off true, overlap at their edges, and carry stamps and counters like real bills. Anti-references: the dark dashboard-screenshot hero, feature-card rows, purple gradients, cream-and-serif \"tasteful\" grounds.",
+  "keyCharacteristics": [
+   "Site-green hoarding ground with plywood grain; paper everywhere content lives.",
+   "Two-ink posters: press black plus one fluoro or riso ink each.",
+   "Condensed wood-type gothic for every headline; Franklin for reading; mono only for counts, stamps and states.",
+   "Run-length shown as fixed-cell split-flap day counters.",
+   "Gaffer-yellow tape marks the visitor's choice."
+  ],
+  "rules": [
+   {
+    "name": "The Two-Ink Rule",
+    "body": "A poster uses press black plus at most one colour ink. A second colour ink on one poster makes it a flyer, not a fly-poster.",
+    "section": "colors"
+   },
+   {
+    "name": "The Tape Is Yours Rule",
+    "body": "Gaffer yellow appears only where the visitor acted or can act (choice, focus, selection, primary header action). Never as decoration.",
+    "section": "colors"
+   },
+   {
+    "name": "The Measured Mono Rule",
+    "body": "Mono is for things that are counted or stamped (days, dates, platforms, states). It never sets a sentence.",
+    "section": "typography"
+   },
+   {
+    "name": "The Contact Shadow Rule",
+    "body": "Every shadow has an offset and a blur. No zero-blur block shadows; this is a hoarding, not neobrutalism.",
+    "section": "elevation"
+   }
+  ],
+  "dos": [
+   "Do keep every viewport mostly site green, with content on paper.",
+   "Do show run-length as a counter or stamp wherever an ad appears.",
+   "Do label example data as invented, close to where it appears.",
+   "Do keep motion to one signature moment (paste-up) plus at most two ambient/reveal pieces (ticker, closing-bill print), all paused when unseen and settled under reduced motion."
+  ],
+  "donts": [
+   "Don't use a cream or warm off-white ground; newsprint here is cool.",
+   "Don't put a label above a heading (no eyebrows or kickers); ranges and stamps go below or beside.",
+   "Don't let poster overlaps cover counters, stamps or hooks.",
+   "Don't set text under 11px, or set sentences in mono.",
+   "Don't invent customers, metrics, logos or pricing; Swipefile has none yet."
+  ]
+ }
+}

@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Swipefile — save the ads that are still running</title>
+<meta name="description" content="Swipefile saves competitor ads from Meta and TikTok ad libraries with their run-length, so you can tell a long-running winner from a one-day test and turn it into a brief.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Libre+Franklin:wght@400;500;600;700&family=Martian+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* hoarding */
+  --wall:#1f3d2b;
+  --wall-deep:#173022;
+  --wall-ink:#eef3ec;
+  --wall-ink-2:#bcd3c2;
+  /* posters */
+  --paper:#eceee8;
+  --paper-2:#dfe2da;
+  --ink:#141414;
+  --ink-2:#3d3f3a;
+  --orange:#ff5b1a;
+  --blue:#2a49d6;
+  --pink:#ff3f8e;
+  --tape:#ffd400;
+  --tape-ink:#1a1600;
+  --error:#ff8a7a;
+
+  --display:"Big Shoulders Display", "Arial Narrow", sans-serif;
+  --body:"Libre Franklin", "Franklin Gothic Medium", sans-serif;
+  --mono:"Martian Mono", ui-monospace, monospace;
+
+  --ease-out:cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out:cubic-bezier(0.77, 0, 0.175, 1);
+
+  --gutter:clamp(16px, 4vw, 56px);
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --ply:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='300'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.004 .09' numOctaves='3' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scrollbar-color:var(--tape) var(--wall-deep);-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--wall) var(--ply);
+  background-blend-mode:multiply;
+  color:var(--wall-ink);
+  font-family:var(--body);
+  font-size:1.0625rem;
+  line-height:1.55;
+  caret-color:var(--orange);
+  overflow-x:hidden;
+}
+::selection{background:var(--tape);color:var(--tape-ink)}
+a{color:inherit;text-underline-offset:.22em;text-decoration-thickness:2px}
+:focus-visible{outline:3px solid var(--tape);outline-offset:3px;border-radius:2px}
+img,svg{display:block}
+.visually-hidden{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- shared poster material ---------- */
+.paper{
+  position:relative;
+  background:var(--paper);
+  color:var(--ink);
+  box-shadow:0 1px 1px rgba(0,0,0,.25), 0 10px 24px -8px rgba(0,0,0,.45);
+}
+.paper::before{ /* newsprint grain */
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:var(--grain);opacity:.22;mix-blend-mode:multiply;
+}
+.paper::after{ /* wheatpaste wrinkles */
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(97deg, transparent 31.6%, rgba(0,0,0,.05) 32%, rgba(255,255,255,.14) 32.5%, transparent 33.2%),
+    linear-gradient(84deg, transparent 63.6%, rgba(0,0,0,.05) 64%, transparent 64.8%),
+    linear-gradient(176deg, transparent 44.6%, rgba(0,0,0,.045) 45%, transparent 45.8%);
+}
+
+.stamp{
+  font-family:var(--mono);
+  font-size:.6875rem;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  font-variant-numeric:tabular-nums;
+}
+
+/* split-flap day counter (adapted from Forever "Split-Flap Board") */
+.counter{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-weight:600}
+.counter__label{font-size:.6875rem;letter-spacing:.08em}
+.counter__cells{display:inline-flex;gap:2px}
+.cell{
+  position:relative;width:1.35em;height:1.75em;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--ink);color:var(--paper);
+  border-radius:2px;font-size:.9375rem;font-variant-numeric:tabular-nums;
+  overflow:hidden;
+}
+.cell::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(255,255,255,.18)}
+.cell.spin .ch{animation:flap .08s linear}
+@keyframes flap{
+  0%{transform:rotateX(0);opacity:1}
+  50%{transform:rotateX(-90deg);opacity:.35}
+  51%{transform:rotateX(90deg)}
+  100%{transform:rotateX(0);opacity:1}
+}
+
+/* ---------- header ---------- */
+.site-head{
+  display:flex;align-items:center;justify-content:space-between;gap:24px;
+  padding:20px var(--gutter);
+}
+.sign{
+  font-family:var(--display);font-weight:900;font-size:1.75rem;letter-spacing:.06em;line-height:1;
+  color:var(--wall);background:var(--wall-ink);padding:6px 12px 4px;text-decoration:none;
+  /* stencil bridges */
+  background-image:linear-gradient(90deg,transparent 0 23%,var(--wall-ink) 23%);
+}
+.site-nav{display:flex;align-items:center;gap:28px}
+.site-nav a{font-weight:600;font-size:.9375rem;text-decoration:none}
+.site-nav a:not(.btn):hover{text-decoration:underline}
+.btn{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:var(--body);font-weight:700;font-size:1rem;line-height:1;
+  padding:14px 20px;border:0;border-radius:2px;cursor:pointer;text-decoration:none;
+  background:var(--ink);color:var(--paper);
+  transition:transform .12s var(--ease-out), background-color .2s ease;
+}
+.btn:active{transform:scale(.97)}
+.btn[disabled]{opacity:.6;cursor:progress}
+.btn--tape{background:var(--tape);color:var(--tape-ink)}
+@media (hover:hover) and (pointer:fine){
+  .btn:hover{background:#2b2b2b}
+  .btn--tape:hover{background:#ffe04d}
+}
+.btn svg{width:18px;height:18px}
+
+/* ---------- hero ---------- */
+.hero{
+  display:grid;
+  grid-template-columns:minmax(0,45fr) minmax(0,55fr);
+  gap:clamp(24px,3vw,48px);
+  align-items:start;
+  padding:clamp(12px,3vw,40px) var(--gutter) clamp(48px,7vw,96px);
+}
+.bill{
+  padding:clamp(24px,3vw,44px);
+  transform:rotate(-.6deg);
+}
+.bill h1{
+  font-family:var(--display);font-weight:900;
+  font-size:clamp(3.25rem,6.6vw,6rem);
+  line-height:.9;letter-spacing:-.01em;text-transform:uppercase;
+  margin:0 0 20px;
+  text-wrap:balance;
+}
+.bill h1 .hl{background:var(--orange);padding:.04em .1em 0;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.bill p{margin:0 0 28px;max-width:46ch;color:var(--ink-2);font-size:1.125rem}
+
+.paste{display:grid;gap:8px}
+.paste label{font-weight:700;font-size:.9375rem}
+.paste__row{display:flex;gap:8px}
+.paste input{
+  flex:1;min-width:0;
+  font:500 1rem var(--body);color:var(--ink);
+  background:#fff;border:2px solid var(--ink);border-radius:2px;
+  padding:12px 14px;
+}
+.paste input::placeholder{color:#62655e}
+.paste input:focus-visible{outline-offset:2px}
+.paste input[aria-invalid="true"]{border-color:#c2261b}
+.paste__msg{font-size:.875rem;margin:0}
+.paste__msg:empty{display:none}
+.paste__msg.is-error{color:#a3170d;font-weight:600}
+.paste__note{font-size:.8125rem;color:var(--ink-2);margin:4px 0 0}
+
+/* the wall */
+.wall{
+  position:relative;
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  grid-auto-rows:minmax(64px,auto);
+  gap:6px;
+  margin:0;padding:0;list-style:none;
+}
+.ad--a{z-index:1}.ad--b{z-index:2}.ad--c{z-index:3}.ad--d{z-index:4}.ad--e{z-index:5}.ad--f{z-index:6}
+@media (min-width: 761px){
+  .ad--b{margin-left:-14px}
+  .ad--c{margin:-10px 0 0 -6px}
+  .ad--d{margin-top:-12px}
+  .ad--e{margin:-10px 0 0 -12px}
+  .ad--f{margin:-12px 0 0 -12px}
+}
+.wall__caption{
+  grid-column:1/-1;font-size:.8125rem;color:var(--wall-ink-2);margin:-2px 0 0;
+}
+.ad{
+  display:flex;flex-direction:column;gap:10px;
+  padding:16px 16px 14px;
+  min-height:100%;
+  transition:transform .3s var(--ease-out);
+}
+.ad__top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ad__brand{font-weight:700;font-size:.8125rem;letter-spacing:.02em}
+.ad__hook{
+  font-family:var(--display);font-weight:800;text-transform:uppercase;
+  font-size:clamp(1.25rem,1.9vw,1.9rem);line-height:.95;margin:0;
+  text-wrap:balance;
+}
+.ad__foot{margin-top:auto;display:flex;justify-content:space-between;align-items:end;gap:8px;flex-wrap:wrap}
+.state{
+  font-family:var(--mono);font-size:.6875rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 6px;border:1.5px solid currentColor;border-radius:2px;
+}
+.platform{font-family:var(--mono);font-size:.6875rem;letter-spacing:.06em}
+
+.ink-orange .ad__hook{color:var(--ink)}
+.ink-orange .ad__panel{background:var(--orange)}
+.ink-blue{--ink-accent:var(--blue)}
+.ink-blue .ad__hook{color:var(--blue)}
+.ink-pink .ad__panel{background:var(--pink)}
+.ad__panel{margin:0 -16px;padding:12px 16px}
+
+/* placement on the wall */
+.ad--a{grid-column:1/4;grid-row:1/4;transform:rotate(-1.2deg)}
+.ad--b{grid-column:4/7;grid-row:1/3;transform:rotate(.8deg)}
+.ad--c{grid-column:4/7;grid-row:3/4;transform:rotate(-.4deg)}
+.ad--d{grid-column:1/3;grid-row:4/6;transform:rotate(.6deg)}
+.ad--e{grid-column:3/5;grid-row:4/6;transform:rotate(-1deg)}
+.ad--f{grid-column:5/7;grid-row:4/6;transform:rotate(1.4deg)}
+
+/* weathered long-runner */
+.ad--weathered{filter:saturate(.72) contrast(.96)}
+.ad--weathered::before{opacity:.38}
+.ad--weathered .ad__panel{background:linear-gradient(170deg,var(--orange),#f27a45 70%,#e9906a)}
+/* pulled: half pasted over by a fresh blank sheet */
+.ad--pulled{overflow:hidden}
+.ad--pulled .cover{
+  position:absolute;top:-24%;right:-22%;width:74%;height:88%;
+  background:#f7f8f4;transform:rotate(-16deg);
+  box-shadow:-4px 5px 12px rgba(0,0,0,.32);
+}
+.ad--pulled .cover::before{content:"";position:absolute;inset:0;background-image:var(--grain);opacity:.18;mix-blend-mode:multiply}
+.ad--pulled .cover::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 40%,rgba(0,0,0,.06) 41%,transparent 43%),linear-gradient(8deg,transparent 60%,rgba(0,0,0,.05) 61%,transparent 63%)}
+
+/* new poster landing */
+.ad--new{position:absolute;top:-16px;left:-12px;width:min(54%,400px);min-height:0;z-index:3}
+.wall.has-new .ad--a{transform:translate(8px,14px) rotate(-.3deg)}
+.wall.has-new .ad--b{transform:translate(6px,4px) rotate(1.3deg)}
+
+/* ---------- sections ---------- */
+.section{padding:clamp(56px,9vw,128px) var(--gutter)}
+.section h2{
+  font-family:var(--display);font-weight:900;text-transform:uppercase;
+  font-size:clamp(2.5rem,5vw,4.5rem);line-height:.92;letter-spacing:-.005em;
+  margin:0 0 18px;max-width:16ch;text-wrap:balance;
+}
+.section .lede{max-width:60ch;color:var(--wall-ink-2);font-size:1.125rem;margin:0}
+.section-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px clamp(24px,4vw,64px);align-items:end;margin-bottom:clamp(32px,5vw,56px)}
+.section-head h2{margin:0}
+
+/* run-length states: a strip of poster stubs */
+.states{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;
+  list-style:none;margin:0;padding:0;
+}
+.stub{padding:18px 18px 20px;display:grid;gap:10px;align-content:start}
+.stub:nth-child(1){transform:rotate(-.8deg)}
+.stub:nth-child(2){transform:rotate(.5deg) translateY(10px)}
+.stub:nth-child(3){transform:rotate(-.3deg) translateY(-6px)}
+.stub:nth-child(4){transform:rotate(1deg) translateY(8px)}
+.stub h3{font-family:var(--display);font-weight:800;text-transform:uppercase;font-size:1.75rem;line-height:1;margin:0}
+.stub p{margin:0;font-size:.9375rem;color:var(--ink-2)}
+.stub .range{font-family:var(--mono);font-size:.8125rem;font-weight:600;font-variant-numeric:tabular-nums}
+.stub--long{background:var(--orange)}
+.stub--long p{color:#2a1205}
+.stub--pulled{background:var(--paper-2)}
+.stub--pulled h3{text-decoration:line-through;text-decoration-thickness:3px}
+
+/* variants → brief */
+.brief-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(24px,4vw,64px);align-items:start}
+.variants{border:0;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.variants legend{font-weight:700;margin-bottom:12px;padding:0}
+.variant{position:relative;cursor:pointer;display:block}
+.variant input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.variant .paper{padding:14px 14px 16px;display:grid;gap:10px;min-height:100%;transition:transform .2s var(--ease-out)}
+.variant .view{font-family:var(--display);font-weight:900;font-size:2.25rem;line-height:.8}
+.variant .ad__hook{font-family:var(--body);font-weight:700;text-transform:none;font-size:1.0625rem;line-height:1.3}
+.variant .stamp{color:var(--ink-2)}
+.variant input:focus-visible + .paper{outline:3px solid var(--tape);outline-offset:3px}
+.variant .tape{
+  position:absolute;top:-10px;left:50%;width:84px;height:26px;margin-left:-42px;
+  background:var(--tape);opacity:.92;transform:rotate(-4deg);
+  box-shadow:0 2px 4px rgba(0,0,0,.25);
+  clip-path:inset(0 100% 0 0);
+  transition:clip-path .22s var(--ease-out);
+}
+.variant input:checked ~ .tape{clip-path:inset(0 0 0 0)}
+@media (hover:hover) and (pointer:fine){
+  .variant:hover .paper{transform:translateY(-3px)}
+}
+
+.brief{padding:clamp(22px,3vw,36px);transform:rotate(.5deg)}
+.brief h3{font-family:var(--display);font-weight:900;text-transform:uppercase;font-size:2rem;line-height:1;margin:0 0 16px}
+.brief dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:10px 18px;font-size:.9375rem}
+.brief dt{font-family:var(--mono);font-size:.6875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);padding-top:3px}
+.brief dd{margin:0}
+.brief .marked{background:linear-gradient(transparent 55%, var(--tape) 55%)}
+.brief textarea{
+  width:100%;min-height:76px;resize:vertical;font:400 .9375rem var(--body);color:var(--ink);
+  border:2px solid var(--ink);border-radius:2px;padding:10px 12px;background:#fff;
+}
+.brief textarea::placeholder{color:#62655e}
+
+/* how it works: one printed handbill, not cards */
+.handbill{padding:clamp(24px,4vw,52px);transform:rotate(-.3deg)}
+.handbill ol{list-style:none;margin:0;padding:0;counter-reset:s}
+.handbill li{
+  display:grid;grid-template-columns:minmax(120px,.35fr) 1fr;gap:8px 32px;
+  padding:22px 0;border-top:2px solid var(--ink);
+}
+.handbill li:last-child{border-bottom:2px solid var(--ink)}
+.handbill h3{font-family:var(--display);font-weight:900;text-transform:uppercase;font-size:2.25rem;line-height:.9;margin:0}
+.handbill p{margin:0;max-width:58ch;color:var(--ink-2)}
+
+/* close */
+.close{
+  padding:clamp(56px,9vw,128px) var(--gutter) clamp(40px,6vw,72px);
+  display:grid;justify-items:start;gap:28px;
+}
+.close{justify-items:stretch}
+.close .bill{background:var(--orange);width:min(100%,1180px);justify-self:center;transform:rotate(.8deg);display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:8px 48px;align-items:end}
+.close .bill h2{grid-row:span 2}
+.close .bill h2{font-family:var(--display);font-weight:900;text-transform:uppercase;font-size:clamp(2.75rem,6vw,5.5rem);line-height:.9;margin:0 0 22px;max-width:14ch}
+.close .bill p{color:#2a1205}
+.site-foot{padding:28px var(--gutter) 40px;color:var(--wall-ink-2);font-size:.875rem;border-top:1px solid rgba(238,243,236,.18)}
+.site-foot p{margin:0;max-width:70ch}
+
+
+/* ---------- wall report ticker (adapted from Forever "Newspaper Ticker") ---------- */
+.ticker{padding:clamp(8px,2vw,24px) 0}
+.ticker__strip{
+  margin:0 -3vw;transform:rotate(-1.2deg);
+  border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);
+}
+.ticker__row{overflow:hidden;white-space:nowrap;padding:9px 0}
+.ticker__row + .ticker__row{border-top:1px solid var(--ink)}
+.ticker__track{display:inline-flex;white-space:nowrap}
+.ticker__track > span{display:inline-flex}
+.ticker__item{
+  font:800 1.25rem/1.2 var(--display);text-transform:uppercase;letter-spacing:.04em;
+  padding-right:2.4em;
+}
+.ticker__item em{font-style:normal;background:var(--orange);padding:0 .22em}
+.ticker__row--b .ticker__item em{background:var(--tape)}
+@keyframes tick-a{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes tick-b{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+.ticker.is-ticking .ticker__row--a .ticker__track{animation:tick-a 46s linear infinite}
+.ticker.is-ticking .ticker__row--b .ticker__track{animation:tick-b 58s linear infinite}
+/* must out-rank the animation shorthand above, which resets play-state */
+.ticker.is-ticking.is-paused .ticker__row .ticker__track,
+.ticker.is-ticking:hover .ticker__row .ticker__track,
+.ticker.is-ticking:focus-within .ticker__row .ticker__track{animation-play-state:paused}
+/* not ticking (reduced motion / no JS): one copy, scrollable by hand */
+.ticker:not(.is-ticking) .ticker__row{overflow-x:auto;scrollbar-width:thin;padding-left:calc(3vw + var(--gutter))}
+.ticker:not(.is-ticking) .ticker__copy{display:none}
+
+/* ---------- closing poster prints itself once (adapted from Forever "Poster Build") ---------- */
+.close .bill h2{position:relative;padding-bottom:20px}
+.close .bill h2::after{
+  content:"";position:absolute;left:0;bottom:0;width:38%;height:6px;background:var(--ink);
+  transform-origin:left center;
+}
+.close .bill .line{display:block;overflow:hidden;padding-bottom:.04em}
+.close .bill .line > span{display:block}
+.build-slab{
+  position:absolute;top:clamp(18px,3vw,40px);right:clamp(18px,3vw,40px);
+  width:clamp(44px,5vw,76px);aspect-ratio:1;background:var(--ink);
+}
+.bill.will-build{clip-path:inset(0 100% 0 0)}
+.bill.will-build .line > span{transform:translateY(105%)}
+.bill.will-build h2::after{transform:scaleX(0)}
+.bill.will-build .build-slab{transform:translateY(-140%);opacity:0}
+.bill.will-build p,.bill.will-build .btn{opacity:0;transform:translateY(8px)}
+.bill.will-build.is-built{clip-path:inset(0 0 0 0);transition:clip-path .7s var(--ease-in-out)}
+.bill.will-build.is-built .line > span{transform:none;transition:transform .6s var(--ease-out) .35s}
+.bill.will-build.is-built .line + .line > span{transition-delay:.45s}
+.bill.will-build.is-built h2::after{transform:none;transition:transform .5s var(--ease-in-out) .6s}
+.bill.will-build.is-built .build-slab{transform:none;opacity:1;transition:transform .5s var(--ease-out) .25s, opacity .3s ease .25s}
+.bill.will-build.is-built p{opacity:1;transform:none;transition:opacity .4s var(--ease-out) .8s, transform .4s var(--ease-out) .8s}
+.bill.will-build.is-built .btn{opacity:1;transform:none;transition:opacity .4s var(--ease-out) .9s, transform .4s var(--ease-out) .9s}
+
+@media print{
+  .bill.will-build,.bill.will-build *{clip-path:none!important;transform:none!important;opacity:1!important}
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 1080px){
+  .hero{grid-template-columns:1fr}
+  .bill{transform:none}
+  .brief-grid{grid-template-columns:1fr}
+}
+@media (max-width: 760px){
+  .site-nav a:not(.btn){display:none}
+  .wall{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ad--a,.ad--b,.ad--c,.ad--d,.ad--e,.ad--f{grid-column:auto;grid-row:auto}
+  .ad--a{grid-column:1/-1}
+  .ad--new{position:relative;top:0;left:0;width:auto;grid-column:1/-1}
+  .ad--f{display:none}
+  .section-head{grid-template-columns:1fr}
+  .close .bill{grid-template-columns:1fr}
+  .close .bill h2{grid-row:auto}
+  .build-slab{display:none}
+  .ticker__item{font-size:1.0625rem}
+  .states{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .variants{grid-template-columns:1fr}
+  .handbill li{grid-template-columns:1fr}
+  .paste__row{flex-direction:column}
+  .paste__row .btn{justify-content:center}
+}
+
+/* ---------- reduced motion: keep fades, drop movement ---------- */
+@media (prefers-reduced-motion: reduce){
+  .ad,.variant .paper,.btn{transition:none}
+  .btn:active{transform:none}
+  .wall.has-new .ad--a,.wall.has-new .ad--b{transform:none}
+  .variant .tape{transition:opacity .2s ease;clip-path:none;opacity:0}
+  .variant input:checked ~ .tape{opacity:.92}
+  .cell.spin .ch{animation:none}
+}
+</style>
+</head>
+<body>
+
+<header class="site-head">
+  <a class="sign" href="#top" aria-label="Swipefile home">SWIPEFILE</a>
+  <nav class="site-nav" aria-label="Main">
+    <a href="#run-length">Run-length</a>
+    <a href="#briefs">Briefs</a>
+    <a href="#how">How it works</a>
+    <a class="btn btn--tape" href="#get">Get the extension</a>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="bill paper">
+      <h1 id="hero-title">Save the ads that are <span class="hl">still running</span></h1>
+      <p>Swipefile keeps every competitor ad you save with its source, its first-seen date and a running day count — so a winner that's been paid for since spring never looks like yesterday's test.</p>
+
+      <form class="paste" id="paste-form" novalidate>
+        <label for="ad-url">Paste an Ad Library link</label>
+        <div class="paste__row">
+          <input id="ad-url" name="url" type="url" inputmode="url" autocomplete="off"
+                 placeholder="facebook.com/ads/library/?id=…" aria-describedby="paste-msg paste-note">
+          <button class="btn" type="submit" id="paste-btn">
+            Paste it up
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h11m-4-5 5 5-5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></svg>
+          </button>
+        </div>
+        <p class="paste__msg" id="paste-msg" role="status" aria-live="polite"></p>
+        <p class="paste__note" id="paste-note">Demo — nothing leaves this page. Try any Meta or TikTok ad link.</p>
+      </form>
+    </div>
+
+    <div>
+      <ul class="wall" id="wall" aria-label="Example wall of saved ads">
+        <li class="ad ad--a paper ink-orange ad--weathered">
+          <div class="ad__top"><span class="ad__brand">Brightside Oat Bars</span><span class="platform">META</span></div>
+          <div class="ad__panel"><p class="ad__hook">Breakfast that fits in a jeans pocket</p></div>
+          <div class="ad__foot">
+            <span class="counter" data-days="214"><span class="counter__label">DAY</span><span class="counter__cells"></span></span>
+            <span class="state">Long-runner</span>
+          </div>
+          <span class="stamp">Posted 03 Mar · still running</span>
+        </li>
+        <li class="ad ad--b paper ink-blue">
+          <div class="ad__top"><span class="ad__brand">Kettle &amp; Coil</span><span class="platform">META</span></div>
+          <p class="ad__hook">Your grandmother's pan, minus the rust</p>
+          <div class="ad__foot">
+            <span class="counter" data-days="87"><span class="counter__label">DAY</span><span class="counter__cells"></span></span>
+            <span class="state">Long-runner</span>
+          </div>
+        </li>
+        <li class="ad ad--c paper ink-pink">
+          <div class="ad__top"><span class="ad__brand">Nightjar</span><span class="platform">TIKTOK</span></div>
+          <div class="ad__panel"><p class="ad__hook">Blackout for people who sleep on planes</p></div>
+          <div class="ad__foot">
+            <span class="counter" data-days="41"><span class="counter__label">DAY</span><span class="counter__cells"></span></span>
+            <span class="state">Long-runner</span>
+          </div>
+        </li>
+        <li class="ad ad--d paper">
+          <div class="ad__top"><span class="ad__brand">Fernway Socks</span><span class="platform">META</span></div>
+          <p class="ad__hook">Ten miles. Zero blisters. Or we pay.</p>
+          <div class="ad__foot">
+            <span class="counter" data-days="12"><span class="counter__label">DAY</span><span class="counter__cells"></span></span>
+            <span class="state">Scaling</span>
+          </div>
+        </li>
+        <li class="ad ad--e paper ink-blue">
+          <div class="ad__top"><span class="ad__brand">Lumen</span><span class="platform">TIKTOK</span></div>
+          <p class="ad__hook">Toothpaste, but a tablet</p>
+          <div class="ad__foot">
+            <span class="counter" data-days="3"><span class="counter__label">DAY</span><span class="counter__cells"></span></span>
+            <span class="state">Testing</span>
+          </div>
+        </li>
+        <li class="ad ad--f paper ad--pulled">
+          <div class="ad__top"><span class="ad__brand">Pocketbrew</span><span class="platform">META</span></div>
+          <p class="ad__hook">Cold brew in 90 seconds</p>
+          <div class="ad__foot">
+            <span class="counter" data-days="2"><span class="counter__label">DAY</span><span class="counter__cells"></span></span>
+            <span class="state">Pulled</span>
+          </div>
+          <div class="cover" aria-hidden="true"></div>
+        </li>
+        <li class="wall__caption" aria-hidden="true">Example ads — every brand on this wall is made up.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="ticker" id="ticker" aria-label="Wall report: example run-length counts">
+    <div class="ticker__strip paper">
+      <div class="ticker__row ticker__row--a"><div class="ticker__track"><span><span class="ticker__item">Brightside Oat Bars <em>Day 214</em> still running</span><span class="ticker__item">Kettle &amp; Coil <em>Day 87</em> long-runner</span><span class="ticker__item">Nightjar <em>Day 41</em> long-runner</span><span class="ticker__item">Fernway Socks <em>Day 12</em> scaling</span></span><span class="ticker__copy" aria-hidden="true"><span class="ticker__item">Brightside Oat Bars <em>Day 214</em> still running</span><span class="ticker__item">Kettle &amp; Coil <em>Day 87</em> long-runner</span><span class="ticker__item">Nightjar <em>Day 41</em> long-runner</span><span class="ticker__item">Fernway Socks <em>Day 12</em> scaling</span></span></div></div>
+      <div class="ticker__row ticker__row--b"><div class="ticker__track"><span><span class="ticker__item">Lumen <em>Day 3</em> testing</span><span class="ticker__item">Pocketbrew <em>pulled after 2 days</em></span><span class="ticker__item">Kettle &amp; Coil view B <em>Day 19</em> scaling</span><span class="ticker__item">Kettle &amp; Coil view C <em>Day 4</em> testing</span></span><span class="ticker__copy" aria-hidden="true"><span class="ticker__item">Lumen <em>Day 3</em> testing</span><span class="ticker__item">Pocketbrew <em>pulled after 2 days</em></span><span class="ticker__item">Kettle &amp; Coil view B <em>Day 19</em> scaling</span><span class="ticker__item">Kettle &amp; Coil view C <em>Day 4</em> testing</span></span></div></div>
+    </div>
+  </section>
+
+  <section class="section" id="run-length" aria-labelledby="rl-title">
+    <div class="section-head"><h2 id="rl-title">Run-length is the signal</h2><p class="lede">Nobody keeps paying for an ad that doesn't work. Swipefile re-checks every saved ad against the Ad Library each day and keeps the count, so your board sorts itself into four states.</p></div>
+    <ul class="states">
+      <li class="stub paper">
+        <h3>Testing</h3>
+        <span class="range">Day 1–6</span>
+        <p>New in the account. Interesting, not proven — save it, don't brief it yet.</p>
+      </li>
+      <li class="stub paper">
+        <h3>Scaling</h3>
+        <span class="range">Day 7–29</span>
+        <p>Survived its first week. Watch for new variants of the same hook.</p>
+      </li>
+      <li class="stub paper stub--long">
+        <h3>Long-runner</h3>
+        <span class="range">Day 30+</span>
+        <p>Someone has paid for this for a month or more. Start your brief here.</p>
+      </li>
+      <li class="stub paper stub--pulled">
+        <h3>Pulled</h3>
+        <span class="range">Stopped</span>
+        <p>No longer in the library. Kept on your board with its final count.</p>
+      </li>
+    </ul>
+  </section>
+
+  <section class="section" id="briefs" aria-labelledby="br-title">
+    <div class="section-head"><h2 id="br-title">Tape your pick into a brief</h2><p class="lede">Competitors run the same offer with different hooks. Line the variants up, tape the one that's lasted longest, and Swipefile turns it into a brief your editor can open.</p></div>
+
+    <div class="brief-grid">
+      <fieldset class="variants" id="variants">
+        <legend>Kettle &amp; Coil, three hooks for the same pan</legend>
+        <label class="variant">
+          <input type="radio" name="view" value="A" data-hook="Your grandmother's pan, minus the rust" data-days="87" data-format="Static image, 1:1" checked>
+          <span class="paper">
+            <span class="view" aria-hidden="true">A</span>
+            <span class="ad__hook">Your grandmother's pan, minus the rust</span>
+            <span class="stamp">Day 87 · static</span>
+          </span>
+          <span class="tape" aria-hidden="true"></span>
+        </label>
+        <label class="variant">
+          <input type="radio" name="view" value="B" data-hook="We dropped it off a roof. Then made eggs." data-days="19" data-format="UGC video, 9:16" >
+          <span class="paper">
+            <span class="view" aria-hidden="true">B</span>
+            <span class="ad__hook">We dropped it off a roof. Then made eggs.</span>
+            <span class="stamp">Day 19 · video</span>
+          </span>
+          <span class="tape" aria-hidden="true"></span>
+        </label>
+        <label class="variant">
+          <input type="radio" name="view" value="C" data-hook="The last pan you'll buy (we checked)" data-days="4" data-format="Carousel, 4 cards">
+          <span class="paper">
+            <span class="view" aria-hidden="true">C</span>
+            <span class="ad__hook">The last pan you'll buy (we checked)</span>
+            <span class="stamp">Day 4 · carousel</span>
+          </span>
+          <span class="tape" aria-hidden="true"></span>
+        </label>
+      </fieldset>
+
+      <article class="brief paper" aria-labelledby="brief-title" aria-live="polite">
+        <h3 id="brief-title">Brief: view <span id="b-view">A</span></h3>
+        <dl>
+          <dt>Hook</dt><dd><span class="marked" id="b-hook">Your grandmother's pan, minus the rust</span></dd>
+          <dt>Running</dt><dd><span id="b-days">87</span> days on Meta</dd>
+          <dt>Format</dt><dd id="b-format">Static image, 1:1</dd>
+          <dt><label for="b-note">Why it works</label></dt>
+          <dd><textarea id="b-note" placeholder="Nostalgia + a specific pain (rust). Try it with our cast-iron line."></textarea></dd>
+        </dl>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" id="how" aria-labelledby="how-title">
+    <div class="section-head"><h2 id="how-title">From ad library to brief in one sitting</h2></div><div class="handbill paper">
+      <ol>
+        <li><h3>Save</h3><p>Browsing the Meta Ad Library or TikTok Creative Center, click the Swipefile button on any ad. It's saved with its source link, first-seen date and the day count so far.</p></li>
+        <li><h3>Sort</h3><p>Drop ads onto boards by product, competitor or angle. Tag hooks and formats. Boards re-sort by run-length as counts change.</p></li>
+        <li><h3>Brief</h3><p>Pick the variant that's lasted, add your note, and share the board as a link your designer or editor can open without an account.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="close" id="get" aria-labelledby="get-title">
+    <div class="bill paper" id="close-bill">
+      <span class="build-slab" aria-hidden="true"></span>
+      <h2 id="get-title"><span class="line"><span>Put the winners</span></span> <span class="line"><span>on your wall</span></span></h2>
+      <p>Install the browser extension, open any ad library, and start saving with context.</p>
+      <a class="btn" href="#get">
+        Get the extension
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h11m-4-5 5 5-5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></svg>
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <p>Swipefile is a fictional product made to test the Quintessence skill. The brands, ads and counts on this page are invented.</p>
+</footer>
+
+<script>
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var EASE = 'cubic-bezier(0.23, 1, 0.32, 1)';
+
+  /* ---- split-flap counters: settle once on load ---- */
+  function pad(n){ return String(n).padStart(3,'0'); }
+  function buildCounter(el, target){
+    var cells = el.querySelector('.counter__cells');
+    cells.innerHTML = '';
+    el.setAttribute('aria-label', 'Day ' + target);
+    var digits = pad(target).split('');
+    var flaps = digits.map(function(d){
+      var c = document.createElement('span'); c.className = 'cell'; c.setAttribute('aria-hidden','true');
+      // The real value is always in the DOM; the flip is an enhancement on top.
+      var ch = document.createElement('span'); ch.className = 'ch'; ch.textContent = d;
+      c.appendChild(ch); cells.appendChild(c);
+      return { el:c, ch:ch, cur:+d, goal:+d };
+    });
+    return flaps;
+  }
+  function settle(flaps){ flaps.forEach(function(f){ f.cur = f.goal; f.ch.textContent = f.goal; }); }
+  function run(flaps, delay){
+    if (reduce || document.hidden) return;
+    var raf = 0, step = 0, zeroed = false, started = performance.now() + delay;
+    function tick(t){
+      if (document.hidden){ settle(flaps); raf = 0; return; }
+      if (t < started){ raf = requestAnimationFrame(tick); return; }
+      if (!zeroed){ zeroed = true; flaps.forEach(function(f){ f.cur = 0; f.ch.textContent = '0'; }); }
+      step++;
+      if (step % 3 === 0){
+        var moving = false;
+        flaps.forEach(function(f){
+          if (f.cur !== f.goal){
+            f.cur = (f.cur + 1) % 10;
+            f.ch.textContent = f.cur;
+            f.el.classList.remove('spin'); void f.el.offsetWidth; f.el.classList.add('spin');
+            moving = true;
+          }
+        });
+        if (!moving) return;
+      }
+      raf = requestAnimationFrame(tick);
+    }
+    raf = requestAnimationFrame(tick);
+    document.addEventListener('visibilitychange', function(){ if (document.hidden) settle(flaps); });
+  }
+  function startCounters(){
+    Array.prototype.forEach.call(document.querySelectorAll('.counter[data-days]'), function(el, i){
+      run(buildCounter(el, +el.dataset.days), 250 + i * 60);
+    });
+  }
+  // A tab opened in the background shows final values; the flip plays the first time it's seen.
+  Array.prototype.forEach.call(document.querySelectorAll('.counter[data-days]'), function(el){ buildCounter(el, +el.dataset.days); });
+  if (document.hidden){
+    document.addEventListener('visibilitychange', function first(){
+      if (document.hidden) return;
+      document.removeEventListener('visibilitychange', first);
+      startCounters();
+    });
+  } else startCounters();
+
+  /* ---- wall report ticker: runs only while on screen and visible ---- */
+  var ticker = document.getElementById('ticker');
+  if (!reduce && 'IntersectionObserver' in window){
+    var tickerSeen = false;
+    var sync = function(){ ticker.classList.toggle('is-paused', !tickerSeen || document.hidden); };
+    ticker.classList.add('is-ticking', 'is-paused');
+    new IntersectionObserver(function(es){ tickerSeen = es[0].isIntersecting; sync(); }).observe(ticker);
+    document.addEventListener('visibilitychange', sync);
+  }
+
+  /* ---- closing poster prints itself once, when it scrolls into view ---- */
+  var bill = document.getElementById('close-bill');
+  if (!reduce && 'IntersectionObserver' in window){
+    var armed = false;
+    var io = new IntersectionObserver(function(es){
+      var e = es[0];
+      if (!armed){
+        // First report: arm only if it's genuinely off-screen in a visible tab.
+        if (e.isIntersecting || document.hidden){ io.disconnect(); return; }
+        armed = true; bill.classList.add('will-build'); return;
+      }
+      if (!e.isIntersecting || e.intersectionRatio < .35) return;
+      io.disconnect();
+      if (document.hidden){ bill.classList.remove('will-build'); return; }
+      bill.classList.add('is-built');
+      setTimeout(function(){ bill.classList.remove('will-build', 'is-built'); }, 1800);
+    }, { threshold: [0, .35] });
+    // Observe the section, not the bill: the bill's own clip-path would hide it from the observer.
+    io.observe(bill.parentElement);
+  }
+
+  /* ---- paste it up ---- */
+  var form = document.getElementById('paste-form');
+  var input = document.getElementById('ad-url');
+  var msg = document.getElementById('paste-msg');
+  var btn = document.getElementById('paste-btn');
+  var wall = document.getElementById('wall');
+  var LIB = /(facebook\.com\/ads\/library|tiktok\.com\/.*(creative|ads|topads)|ads\.tiktok\.com)/i;
+
+  function setError(text){
+    msg.textContent = text; msg.className = 'paste__msg is-error';
+    input.setAttribute('aria-invalid','true');
+  }
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var v = input.value.trim();
+    if (!v){ setError('Paste a link first — copy it from the ad\'s page in the Ad Library.'); input.focus(); return; }
+    if (!LIB.test(v)){ setError('That isn\'t an Ad Library link. Copy the URL from facebook.com/ads/library or TikTok Creative Center.'); input.focus(); return; }
+    input.removeAttribute('aria-invalid');
+    msg.className = 'paste__msg'; msg.textContent = 'Pasting…';
+    btn.disabled = true;
+
+    setTimeout(function(){
+      var platform = /tiktok/i.test(v) ? 'TIKTOK' : 'META';
+      var old = wall.querySelector('.ad--new'); if (old) old.remove();
+      var li = document.createElement('li');
+      li.className = 'ad ad--new paper ink-pink';
+      li.innerHTML =
+        '<div class="ad__top"><span class="ad__brand">Your saved ad</span><span class="platform">' + platform + '</span></div>' +
+        '<div class="ad__panel"><p class="ad__hook">Saved with its source and today\'s date</p></div>' +
+        '<div class="ad__foot"><span class="counter"><span class="counter__label">DAY</span><span class="counter__cells"></span></span><span class="state">Testing</span></div>';
+      wall.insertBefore(li, wall.firstChild);
+      wall.classList.add('has-new');
+      run(buildCounter(li.querySelector('.counter'), 1), 180);
+
+      if (reduce){
+        li.animate([{opacity:0},{opacity:1}], {duration:200, easing:'ease'});
+      } else {
+        li.animate([
+          {opacity:0, transform:'translateY(-14px) scale(1.04) rotate(-2.5deg)'},
+          {opacity:1, transform:'translateY(0) scale(1) rotate(-.8deg)'}
+        ], {duration:420, easing:EASE, fill:'forwards'});
+      }
+      btn.disabled = false;
+      msg.textContent = 'Pasted up. Day 1 — Swipefile will keep counting while it runs.';
+      input.value = '';
+    }, 450);
+  });
+
+  /* ---- variants → brief ---- */
+  var fields = { view:'b-view', hook:'b-hook', days:'b-days', format:'b-format' };
+  document.getElementById('variants').addEventListener('change', function(e){
+    var r = e.target; if (r.name !== 'view') return;
+    document.getElementById(fields.view).textContent = r.value;
+    document.getElementById(fields.hook).textContent = r.dataset.hook;
+    document.getElementById(fields.days).textContent = r.dataset.days;
+    document.getElementById(fields.format).textContent = r.dataset.format;
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+# fetched / generated at install time
+vendor/
+dist/
+# local editor + preview config
+.claude/
+.DS_Store
+__pycache__/
