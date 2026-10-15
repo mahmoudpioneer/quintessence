@@ -10,7 +10,9 @@ license: MIT (bundles MIT and Apache-2.0 modules; see LICENSES/)
 
 One entry point over five design toolkits. This file decides **which module runs, in what order, and who wins when they disagree.** The modules hold the depth — load only the ones the current step needs.
 
-`<q>` below means this skill's base directory (the folder containing this file, normally `~/.claude/skills/quintessence`). Every module lives in `<q>/modules/<name>/` with its own `SKILL.md`; relative paths inside a module (`scripts/…`, `reference/…`, `references/…`) resolve against **that module's folder**. Use `python3`, not `python`.
+`<q>` below means this skill's base directory (the folder containing this file, normally `~/.claude/skills/quintessence`). Every module lives in `<q>/modules/<name>/` with its own `SKILL.md`; relative paths inside a module (`scripts/…`, `reference/…`, `references/…`) resolve against **that module's folder**.
+
+**Platform notes.** Commands below are written for macOS/Linux (`python3`, forward slashes). On **Windows**, Claude Code runs commands in Git Bash: forward-slash paths still work and `<q>` is `%USERPROFILE%\.claude\skills\quintessence`; use `python` (or `py -3`) whenever `python3` is not found; run the impeccable launcher as `scripts/impeccable` from Git Bash, or `scripts\impeccable.cmd` from cmd/PowerShell. Screenshots need Node 22+ and any Chromium browser (Edge ships with Windows).
 
 ## Modules
 

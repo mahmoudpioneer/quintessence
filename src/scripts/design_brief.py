@@ -16,6 +16,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+# Windows consoles default to a legacy code page; force UTF-8 so bullets and dashes print.
+for _s in (sys.stdout, sys.stderr):
+    if hasattr(_s, "reconfigure"):
+        _s.reconfigure(encoding="utf-8", errors="replace")
+
 ROOT = Path(__file__).resolve().parent.parent
 SEARCH = ROOT / "modules" / "ui-ux-pro-max" / "scripts" / "search.py"
 
@@ -53,7 +58,7 @@ def main():
         sys.exit(__doc__)
     if "--design-system" not in args:
         args.append("--design-system")
-    out = subprocess.run([sys.executable, str(SEARCH), *args, "--json"], capture_output=True, text=True)
+    out = subprocess.run([sys.executable, str(SEARCH), *args, "--json"], capture_output=True, text=True, encoding="utf-8")
     if out.returncode != 0:
         sys.exit(out.stderr or out.stdout)
     ds = json.loads(out.stdout)["design_system"]

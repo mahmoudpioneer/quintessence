@@ -1,0 +1,63 @@
+name: install & test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # ---- macOS / Linux: the documented commands
+      - name: Install (update.sh)
+        if: runner.os != 'Windows'
+        run: ./update.sh
+      - name: Test (test.sh)
+        if: runner.os != 'Windows'
+        run: ./test.sh
+
+      # ---- Windows: the documented .cmd wrappers, from cmd.exe
+      - name: Install (update.cmd)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: update.cmd
+      - name: Test (test.cmd)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: test.cmd
+
+      # Claude Code on Windows runs commands through Git Bash; the skill's docs use these forms.
+      - name: Git Bash paths Claude Code uses
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          Q="$HOME/.claude/skills/quintessence"
+          "$Q/modules/impeccable/scripts/impeccable" engine-probe
+          python "$Q/modules/forever/scripts/forever_search.py" loader --perf cheap -n 2
+          python "$Q/scripts/design_brief.py" "saas dashboard" -p CI | head -20
+          python "$Q/modules/ui-ux-pro-max/scripts/search.py" "fintech" --domain color -n 1
+          grep -q '^python ' "$Q/modules/ui-ux-pro-max/SKILL.md" && echo "uupm docs use 'python' on Windows"
+
+      - name: Uninstall leaves nothing behind
+        shell: bash
+        run: |
+          python quintessence.py uninstall
+          test ! -e "$HOME/.claude/skills/quintessence"
+          ! ls "$HOME/.claude/agents"/impeccable-*.md 2>/dev/null

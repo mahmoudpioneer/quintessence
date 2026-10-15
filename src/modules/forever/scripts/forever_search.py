@@ -14,6 +14,11 @@ import re
 import sys
 from pathlib import Path
 
+# Windows consoles default to a legacy code page; force UTF-8 so bullets and dashes print.
+for _s in (sys.stdout, sys.stderr):
+    if hasattr(_s, "reconfigure"):
+        _s.reconfigure(encoding="utf-8", errors="replace")
+
 ROOT = Path(__file__).resolve().parent.parent / "infinite"
 INDEX = ROOT / "components.index.json"
 REMOTE = "https://raw.githubusercontent.com/isas1/forever-ai-components/main/infinite/"
@@ -100,7 +105,7 @@ def main():
     p.add_argument("--facets", action="store_true", help="print available filter values and counts")
     args = p.parse_args()
 
-    data = json.loads(INDEX.read_text())
+    data = json.loads(INDEX.read_text(encoding="utf-8"))
     if args.facets:
         print(json.dumps(data["counts"]["facets"], indent=1))
         return

@@ -4,7 +4,7 @@
 
 <p align="center">
   <b>One skill. Five design minds. Interfaces that don't look AI-made.</b><br>
-  <sub>For <a href="https://claude.com/claude-code">Claude Code</a> · macOS / Linux · Python 3 + Node 22 · no npm dependencies</sub>
+  <sub>For <a href="https://claude.com/claude-code">Claude Code</a> · macOS · Linux · Windows · Python 3.9+ · git · no npm dependencies</sub>
 </p>
 
 ---
@@ -51,21 +51,36 @@ The [`test-landing/`](test-landing) page was built end to end with Quintessence 
 
 ## Install
 
+Needs **git** and **Python 3.9+**. Optional: **Node 22+** and any Chromium browser (Chrome, Edge, Brave) for screenshots.
+
+**macOS / Linux**
+
 ```bash
 git clone https://github.com/mahmoudpioneer/quintessence.git
 cd quintessence
 ./update.sh        # fetches the five toolkits, builds, installs, smoke-tests
-./test.sh          # 63 checks
+./test.sh          # 66 checks
 ```
 
-This installs the skill to `~/.claude/skills/quintessence` and impeccable's four review agents to `~/.claude/agents`. Start a new Claude Code session and type `/quintessence`.
+**Windows** (Command Prompt or PowerShell)
 
-| Command | Does |
-|---|---|
-| `./update.sh` | Pull the latest toolkits, rebuild, reinstall |
-| `./install.sh` | Rebuild and reinstall from the toolkits already fetched |
-| `./test.sh` | Verify the install |
-| `./uninstall.sh` | Remove the skill and the agents it installed |
+```bat
+git clone https://github.com/mahmoudpioneer/quintessence.git
+cd quintessence
+update.cmd
+test.cmd
+```
+
+This installs the skill to `~/.claude/skills/quintessence` (`%USERPROFILE%\.claude\skills\quintessence` on Windows) and impeccable's four review agents to `~/.claude/agents`. Start a new Claude Code session and type `/quintessence`.
+
+| macOS / Linux | Windows | Does |
+|---|---|---|
+| `./update.sh` | `update.cmd` | Pull the latest toolkits, rebuild, reinstall |
+| `./install.sh` | `install.cmd` | Rebuild and reinstall from the toolkits already fetched |
+| `./test.sh` | `test.cmd` | Verify the install |
+| `./uninstall.sh` | `uninstall.cmd` | Remove the skill and only the agents it installed |
+
+All of them run [`quintessence.py`](quintessence.py) (standard library only), so `python quintessence.py <command>` works anywhere. Every push is installed and tested on Windows, Linux and macOS by [GitHub Actions](.github/workflows/ci.yml).
 
 ## Use
 
@@ -94,7 +109,8 @@ src/SKILL.md                 the router: routing, precedence, Motion budget, pip
 src/scripts/design_brief.py  ui-ux-pro-max output → KEEP / REVIEW / REJECT
 src/scripts/capture.mjs      headless-Chrome screenshots, no dependencies
 src/modules/forever/         Forever wrapper + offline component search
-build.sh · install.sh · update.sh · test.sh · uninstall.sh
+quintessence.py              build / install / update / test / uninstall, any OS
+*.sh · *.cmd                 one-line wrappers for macOS/Linux and Windows
 test-landing/                example build with its full design paper trail
 ```
 

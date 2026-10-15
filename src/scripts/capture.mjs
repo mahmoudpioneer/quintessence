@@ -6,7 +6,7 @@
 // Writes desktop.png (first width) and mobile.png (second width), plus <width>.png for any extra widths.
 // Captures use prefers-reduced-motion by default so every entrance has settled; pass --motion to capture
 // the animated state instead. Set CHROME_PATH to use a specific browser.
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -19,20 +19,39 @@ const out = resolve(opt('--out', '.impeccable/review'));
 const widths = opt('--widths', '1440,390').split(',').map(Number);
 const motion = args.includes('--motion');
 
-const candidates = [process.env.CHROME_PATH,
+// Any Chromium-based browser works: Chrome, Chromium, Edge, Brave.
+const env = process.env;
+const winRoots = [env.PROGRAMFILES, env['PROGRAMFILES(X86)'], env.LOCALAPPDATA].filter(Boolean);
+const candidates = [env.CHROME_PATH,
+  // macOS
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   '/Applications/Chromium.app/Contents/MacOS/Chromium',
   '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
   '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser',
-  '/usr/bin/google-chrome', '/usr/bin/chromium', '/usr/bin/chromium-browser'].filter(Boolean);
-const chrome = candidates.find(p => existsSync(p));
-if (!chrome) { console.error('No Chrome/Chromium found. Set CHROME_PATH.'); process.exit(1); }
+  // Windows
+  ...winRoots.flatMap(r => [join(r, 'Google', 'Chrome', 'Application', 'chrome.exe'),
+    join(r, 'Microsoft', 'Edge', 'Application', 'msedge.exe'),
+    join(r, 'Chromium', 'Application', 'chrome.exe'),
+    join(r, 'BraveSoftware', 'Brave-Browser', 'Application', 'brave.exe')]),
+  // Linux
+  '/usr/bin/google-chrome', '/usr/bin/google-chrome-stable', '/usr/bin/chromium', '/usr/bin/chromium-browser',
+  '/snap/bin/chromium', '/usr/bin/microsoft-edge', '/usr/bin/brave-browser'].filter(Boolean);
+const onPath = name => {
+  const r = spawnSync(process.platform === 'win32' ? 'where' : 'which', [name], { encoding: 'utf8' });
+  return r.status === 0 ? r.stdout.split(/\r?\n/)[0].trim() : null;
+};
+const chrome = candidates.find(p => existsSync(p)) ||
+  ['google-chrome', 'google-chrome-stable', 'chromium', 'chromium-browser', 'msedge', 'chrome'].map(onPath).find(Boolean);
+if (!chrome) { console.error('No Chrome, Chromium, Edge or Brave found. Install one or set CHROME_PATH.'); process.exit(1); }
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const port = 9400 + Math.floor(Math.random() * 400);
 const profile = mkdtempSync(join(tmpdir(), 'qcap-'));
-const proc = spawn(chrome, ['--headless=new', '--disable-gpu', '--hide-scrollbars', `--remote-debugging-port=${port}`,
-  `--user-data-dir=${profile}`, 'about:blank'], { stdio: 'ignore' });
+const flags = ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--no-first-run', '--no-default-browser-check',
+  `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`];
+// Chrome refuses to run as root without this (Docker, some CI images); /dev/shm is tiny in containers.
+if (process.getuid?.() === 0 || env.CI) flags.push('--no-sandbox', '--disable-dev-shm-usage');
+const proc = spawn(chrome, [...flags, 'about:blank'], { stdio: 'ignore' });
 
 try {
   let targets;
@@ -74,6 +93,7 @@ try {
   console.error(e.message); process.exitCode = 1;
 } finally {
   proc.kill();
-  await sleep(300);
-  rmSync(profile, { recursive: true, force: true });
+  await sleep(500);
+  // Windows keeps the profile locked for a moment after Chrome exits.
+  try { rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 }); } catch {}
 }
